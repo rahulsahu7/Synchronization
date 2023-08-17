@@ -1,0 +1,43 @@
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.concurrent.Future;
+
+public class AsynchronousIOWithComputation {
+
+    public static void main(String[] args) {
+        Path filePath = Paths.get("example.txt");
+
+        try (AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(
+                filePath, StandardOpenOption.READ)) {
+
+            ByteBuffer buffer = ByteBuffer.allocate(1024);
+
+            // Start an asynchronous read operation
+            Future<Integer> readResult = fileChannel.read(buffer, 0);
+
+            // Simulate computation while reading
+            for (int i = 1; i <= 5; i++) {
+                System.out.println("Performing computation step " + i);
+                Thread.sleep(500);
+            }
+
+            // Wait for the read operation to complete and get the result
+            int bytesRead = readResult.get();
+
+            // Display the read data
+            buffer.flip();
+            byte[] data = new byte[bytesRead];
+            buffer.get(data);
+            System.out.println("Read data: " + new String(data));
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
